@@ -10,33 +10,36 @@ public class EnemyAI : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed = 2.5f;
     public float detectionRange = 6f;
-    public float attackRange = 2.5f;
+    public float attackRange = 1.2f;
 
     [Header("Attack")]
     public float attackCooldown = 1f;
     private float attackTimer;
 
-    private bool isFacingRight = true;
-
     [Header("Damage")]
     public int damage = 10;
-    public float damageRange = 2.5f;
+    public float damageRange = 1.2f;
+
+    private bool isFacingRight = true;
 
     private void Awake()
     {
         if (rb == null) rb = GetComponent<Rigidbody2D>();
         if (anim == null) anim = GetComponent<Animator>();
+    }
 
-        if (player == null)
-        {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null) player = playerObj.transform;
-        }
+    private void Start()
+    {
+        FindPlayer();
     }
 
     private void Update()
     {
-        if (player == null) return;
+        if (player == null)
+        {
+            FindPlayer();
+            return;
+        }
 
         float distance = Vector2.Distance(transform.position, player.position);
 
@@ -57,57 +60,75 @@ public class EnemyAI : MonoBehaviour
         FlipToPlayer();
     }
 
+    private void FindPlayer()
+    {
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+
+        if (p != null)
+        {
+            player = p.transform;
+            Debug.Log("Player ditemukan: " + p.name);
+        }
+        else
+        {
+            Debug.LogWarning("Player tidak ditemukan. Cek Tag Player!");
+        }
+    }
+
     private void ChasePlayer()
     {
         Vector2 direction = (player.position - transform.position).normalized;
+        rb.linearVelocity = direction * moveSpeed;
 
-        rb.linearVelocity = new Vector2(direction.x * moveSpeed, direction.y * moveSpeed);
-
-        anim.SetBool("EnemyWalk", true);
+        if (anim != null)
+            anim.SetBool("EnemyWalk", true);
     }
 
     private void StopMoving()
     {
         rb.linearVelocity = Vector2.zero;
-        anim.SetBool("EnemyWalk", false);
+
+        if (anim != null)
+            anim.SetBool("EnemyWalk", false);
     }
 
     private void AttackPlayer()
-{
-    rb.linearVelocity = Vector2.zero;
-    anim.SetBool("EnemyWalk", false);
-
-    attackTimer -= Time.deltaTime;
-
-    if (attackTimer <= 0f)
     {
-        Debug.Log("Enemy menyerang!");
-        anim.ResetTrigger("EnemyAttack");
-        anim.SetTrigger("EnemyAttack");
+        rb.linearVelocity = Vector2.zero;
 
-        if (Vector2.Distance(transform.position, player.position) <= damageRange)
+        if (anim != null)
+            anim.SetBool("EnemyWalk", false);
+
+        attackTimer -= Time.deltaTime;
+
+        if (attackTimer <= 0f)
         {
+            Debug.Log("Enemy menyerang!");
+
+            if (anim != null)
+            {
+                anim.ResetTrigger("EnemyAttack");
+                anim.SetTrigger("EnemyAttack");
+            }
+
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
 
-            if (playerHealth != null)
+            if (playerHealth != null && Vector2.Distance(transform.position, player.position) <= damageRange)
             {
                 playerHealth.TakeDamage(damage);
+                Debug.Log("HIDUP PRABOWO");
             }
-        }
 
-        attackTimer = attackCooldown;
+            attackTimer = attackCooldown;
+        }
     }
-}
+
     private void FlipToPlayer()
     {
         if (player.position.x > transform.position.x && !isFacingRight)
-        {
             Flip();
-        }
         else if (player.position.x < transform.position.x && isFacingRight)
-        {
             Flip();
-        }
     }
 
     private void Flip()
@@ -117,17 +138,5 @@ public class EnemyAI : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.x *= -1f;
         transform.localScale = scale;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, damageRange);
     }
 }

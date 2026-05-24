@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    // Static reference to hold our single player instance globally
     public static Movement Instance { get; private set; }
 
     public Rigidbody2D rb;
@@ -35,18 +34,14 @@ public class Movement : MonoBehaviour
 
     private void Awake()
     {
-        // PERSISTENCE LOGIC START
-        // If an instance already exists and it's not this one, destroy the new duplicate
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        // Establish this object as the persistent instance and protect it across scenes
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        // PERSISTENCE LOGIC END
 
         anim = GetComponent<Animator>();
 
@@ -69,7 +64,6 @@ public class Movement : MonoBehaviour
 
         anim.SetBool("Walk", moveInput.magnitude > 0);
 
-        // HOLD / HEAVY ATTACK - Klik kiri
         if (Input.GetMouseButtonDown(0) && !isBowCharging)
         {
             isChargingAttack = true;
@@ -98,7 +92,6 @@ public class Movement : MonoBehaviour
             attackHoldTime = 0f;
         }
 
-        // BOW ATTACK - Klik kanan
         if (Input.GetMouseButtonDown(1) && !isChargingAttack)
         {
             isBowCharging = true;
@@ -143,7 +136,6 @@ public class Movement : MonoBehaviour
     {
         anim.ResetTrigger("HeavyAttack");
         anim.SetTrigger("Attack");
-
         DealDamage(attackDamage);
     }
 
@@ -151,7 +143,6 @@ public class Movement : MonoBehaviour
     {
         anim.ResetTrigger("Attack");
         anim.SetTrigger("HeavyAttack");
-
         DealDamage(heavyAttackDamage);
     }
 
@@ -159,7 +150,7 @@ public class Movement : MonoBehaviour
     {
         if (attackPoint == null)
         {
-            Debug.LogWarning("AttackPoint belum dipasang di Inspector!");
+            Debug.LogWarning("AttackPoint belum dipasang!");
             return;
         }
 
@@ -174,7 +165,17 @@ public class Movement : MonoBehaviour
             EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
 
             if (enemyHealth != null)
+            {
                 enemyHealth.TakeDamage(damage);
+                continue;
+            }
+
+            EnemyHealthSkeleton skeletonHealth = enemy.GetComponent<EnemyHealthSkeleton>();
+
+            if (skeletonHealth != null)
+            {
+                skeletonHealth.TakeDamage(damage);
+            }
         }
     }
 
@@ -182,7 +183,7 @@ public class Movement : MonoBehaviour
     {
         if (arrowPrefab == null || arrowSpawnPoint == null)
         {
-            Debug.LogWarning("Arrow Prefab atau Arrow Spawn Point belum dipasang!");
+            Debug.LogWarning("Arrow belum dipasang!");
             return;
         }
 
@@ -197,7 +198,6 @@ public class Movement : MonoBehaviour
 
         if (arrowRb == null)
         {
-            Debug.LogWarning("Arrow belum punya Rigidbody2D!");
             Destroy(arrow);
             return;
         }
@@ -206,7 +206,6 @@ public class Movement : MonoBehaviour
             arrowScript.damage = arrowDamage;
 
         float direction = isFacingRight ? 1f : -1f;
-
         float holdPercent = bowHoldTime / maxBowHoldTime;
         float finalSpeed = arrowSpeed + (arrowSpeed * holdPercent);
 
