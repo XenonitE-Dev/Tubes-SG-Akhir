@@ -2,12 +2,19 @@ using UnityEngine;
 
 public class SpawnPoint : MonoBehaviour
 {
-    void Start()
+    public string spawnID;
+
+    private void Start()
     {
-        // If the player exists, teleport them instantly to this object's exact position
-        if (Movement.Instance != null)
+        if (Movement.Instance == null) return;
+
+        if (GameManager.Instance.lastSpawnID == spawnID)
         {
-            Movement.Instance.transform.position = transform.position;
+            Movement.Instance.transform.position = new Vector3(
+                transform.position.x,
+                transform.position.y,
+                0f
+            );
         }
     }
 }

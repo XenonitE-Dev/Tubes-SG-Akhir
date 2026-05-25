@@ -6,6 +6,7 @@ public class PlayerHealth : MonoBehaviour
     public int currentHealth;
 
     public Animator anim;
+    public HealthBarUI healthBar;
 
     private bool isDead = false;
 
@@ -17,6 +18,12 @@ public class PlayerHealth : MonoBehaviour
             anim = GetComponent<Animator>();
     }
 
+    private void Start()
+    {
+        if (healthBar != null)
+            healthBar.SetMaxHealth(maxHealth);
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead) return;
@@ -26,7 +33,8 @@ public class PlayerHealth : MonoBehaviour
 
         anim.SetTrigger("Hurt");
 
-        Debug.Log("Player terkena damage! HP: " + currentHealth);
+        if (healthBar != null)
+            healthBar.SetHealth(currentHealth);
 
         if (currentHealth <= 0)
         {
@@ -40,9 +48,6 @@ public class PlayerHealth : MonoBehaviour
 
         anim.SetTrigger("Die");
 
-        Debug.Log("Player mati!");
-
-        // Optional: matikan gerakan player
         Movement movement = GetComponent<Movement>();
         if (movement != null)
             movement.enabled = false;

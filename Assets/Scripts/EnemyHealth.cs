@@ -1,11 +1,13 @@
 using UnityEngine;
-using System.Collections;
 
 public class EnemyHealth : MonoBehaviour
 {
     [Header("Health")]
     public int maxHealth = 50;
     private int currentHealth;
+
+    [Header("UI")]
+    public HealthBarUI healthBar;
 
     [Header("References")]
     public Animator anim;
@@ -32,6 +34,12 @@ public class EnemyHealth : MonoBehaviour
             enemyCollider = GetComponent<Collider2D>();
     }
 
+    private void Start()
+    {
+        if (healthBar != null)
+            healthBar.SetMaxHealth(maxHealth);
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead) return;
@@ -41,7 +49,8 @@ public class EnemyHealth : MonoBehaviour
 
         anim.SetTrigger("EnemyHurt");
 
-        Debug.Log("Enemy HP: " + currentHealth);
+        if (healthBar != null)
+            healthBar.SetHealth(currentHealth);
 
         if (currentHealth <= 0)
         {

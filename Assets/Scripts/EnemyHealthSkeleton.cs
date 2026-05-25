@@ -6,6 +6,9 @@ public class EnemyHealthSkeleton : MonoBehaviour
     public int maxHealth = 50;
     private int currentHealth;
 
+    [Header("UI")]
+    public HealthBarUI healthBar;
+
     [Header("References")]
     public Animator anim;
     public SkeletonAI skeletonAI;
@@ -28,6 +31,12 @@ public class EnemyHealthSkeleton : MonoBehaviour
         if (enemyCollider == null) enemyCollider = GetComponent<Collider2D>();
     }
 
+    private void Start()
+    {
+        if (healthBar != null)
+            healthBar.SetMaxHealth(maxHealth);
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead) return;
@@ -40,6 +49,9 @@ public class EnemyHealthSkeleton : MonoBehaviour
             anim.ResetTrigger(hurtParam);
             anim.SetTrigger(hurtParam);
         }
+
+        if (healthBar != null)
+            healthBar.SetHealth(currentHealth);
 
         if (currentHealth <= 0)
         {
