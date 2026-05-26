@@ -21,7 +21,7 @@ public class Transition : MonoBehaviour
 
         isTransitioning = true;
 
-        if (GameManager.Instance != null)
+        if (GameManager.Instance != null && !string.IsNullOrEmpty(targetSpawnID))
             GameManager.Instance.lastSpawnID = targetSpawnID;
 
         SceneManager.LoadScene(sceneToLoad);
